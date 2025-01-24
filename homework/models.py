@@ -18,6 +18,8 @@ class Product:
         Возвращает True, если количество продукта больше или равно запрашиваемому,
         и False в обратном случае
         """
+        if quantity < 0:
+            return False
         return self.quantity >= quantity
 
     def buy(self, quantity):
@@ -26,6 +28,8 @@ class Product:
         Проверяет количество продукта с помощью метода check_quantity.
         Если продуктов не хватает, выбрасывает исключение ValueError.
         """
+        if quantity <= 0:
+            raise ValueError("Quantity must be greater than zero")
         if not self.check_quantity(quantity):
             raise ValueError("Not enough quantity available")
         self.quantity -= quantity
@@ -51,6 +55,8 @@ class Cart:
         Метод добавления продукта в корзину.
         Если продукт уже есть в корзине, то увеличиваем количество.
         """
+        if buy_count <= 0:
+            return  # Игнорируем добавление нулевого или отрицательного количества
         if product in self.products:
             self.products[product] += buy_count
         else:
@@ -61,12 +67,14 @@ class Cart:
         Метод удаления продукта из корзины.
         Если remove_count не передан, то удаляется вся позиция.
         Если remove_count больше, чем количество продуктов в позиции, то удаляется вся позиция.
+        Игнорирует попытку удаления отрицательного количества.
         """
-        if product in self.products:
-            if remove_count is None or remove_count >= self.products[product]:
-                del self.products[product]
-            else:
-                self.products[product] -= remove_count
+        if product not in self.products:
+            return
+        if remove_count is None or remove_count >= self.products[product]:
+            del self.products[product]
+        elif remove_count > 0:
+            self.products[product] -= remove_count
 
     def clear(self):
         """
@@ -87,6 +95,8 @@ class Cart:
         Если товаров недостаточно, выбрасывает ValueError.
         После успешной покупки очищает корзину.
         """
+        if not self.products:
+            raise ValueError("Cart is empty")
         for product, quantity in self.products.items():
             if not product.check_quantity(quantity):
                 raise ValueError(f"Not enough quantity for product: {product.name}")
